@@ -1,5 +1,7 @@
 # pulpie-mcp
 
+![pulpie-mcp](pulpie.png)
+
 An MCP server that gives AI agents their own tools for turning web pages into clean Markdown. It runs the [Pulpie](https://github.com/feyninc/pulpie) content extraction model locally, so tables, code blocks, links, and images come through intact instead of getting summarized away.
 
 The agent can read a page inline, save it as a `.md` file, crawl a whole docs section into a folder, and check what it already saved before fetching again.
