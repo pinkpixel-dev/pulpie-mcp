@@ -1,0 +1,47 @@
+[project]
+name = "pulpie-mcp"
+version = "0.1.0"
+description = "MCP server that turns any web page into clean Markdown with a local Pulpie model, and saves docs for agents to reference."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Pink Pixel", email = "admin@pinkpixel.dev" }]
+requires-python = ">=3.10"
+keywords = ["mcp", "markdown", "web-scraping", "content-extraction", "pulpie", "documentation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = [
+    "mcp>=2.3,<3",
+    "httpx>=0.27",
+    "pulpie[markdown]>=0.0.2",
+    # pulpie 0.0.2 imports selectolax.parser (Modest), which selectolax 1.0 removed.
+    "selectolax>=0.3,<1.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.28",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/pinkpixel-dev/pulpie-mcp"
+Repository = "https://github.com/pinkpixel-dev/pulpie-mcp"
+
+[project.scripts]
+pulpie-mcp = "pulpie_mcp.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "anyio>=4"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pulpie_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: needs network access and the Pulpie model (set PULPIE_INTEGRATION=1)"]
