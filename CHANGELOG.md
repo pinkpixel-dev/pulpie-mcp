@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 - October 5, 2026
+
+### 🔎 Search
+
+- New `search_library` tool searches saved docs by content and returns the matching sections, each with its heading path, source URL, file path, and an excerpt
+- Searches the global library by default, or any absolute `directory`, and `site` limits results to one host
+- The index lives in `$PULPIE_HOME/search.db` and updates itself on every search, so pages saved by any tool or edited by hand are picked up without a reindex step
+- Punctuation in queries is safe, and camelCase words also match snake_case docs
+- When no section matches every word, it falls back to partial matches and says so
+
 ## 0.1.0 - October 5, 2026
 
 First release.

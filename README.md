@@ -4,7 +4,7 @@
 
 An MCP server that gives AI agents their own tools for turning web pages into clean Markdown. It runs the [Pulpie](https://github.com/feyninc/pulpie) content extraction model locally, so tables, code blocks, links, and images come through intact instead of getting summarized away.
 
-The agent can read a page inline, save it as a `.md` file, crawl a whole docs section into a folder, and check what it already saved before fetching again.
+The agent can read a page inline, save it as a `.md` file, crawl a whole docs section into a folder, and search everything it saved later. Over time the library turns into a local reference collection you can reuse across projects.
 
 ## Why I made it
 
@@ -20,12 +20,14 @@ So this gives the agent the same thing I was using. It can grab full documentati
 | `save_markdown` | Save one page as a `.md` file. Returns the path and a heading outline instead of the whole page, so it doesn't eat the agent's context. |
 | `crawl_docs` | Save a documentation section as a folder of `.md` files plus an `index.md`. Up to 500 pages per crawl, 50 by default. |
 | `list_library` | List saved docs with their source URL and fetch time, optionally filtered by a search term. |
+| `search_library` | Search saved docs by what they say and get back the matching sections, each with its heading path, source URL, and file path. |
 
 A few details worth knowing:
 
 - **Where files go is up to the agent.** For project work it passes a folder inside the project, like `/path/to/project/DOCS/reference/uv`. For general research it leaves `directory` empty and the file goes into the global library at `~/.pulpie/library/<site>/`.
 - **Every saved file has frontmatter** with `title`, `source`, and `fetched`, so you (and the agent) can always tell where a file came from and how old it is.
 - **Crawling checks the sitemap first.** It looks at `robots.txt`, then `<docs path>/sitemap.xml`, then `/sitemap.xml`. If none of those exist, it follows links from the pages instead. It only crawls pages on the same host and under the starting path.
+- **Search works on sections, not whole pages.** Each page is split at its `#`, `##`, and `###` headings, so a search for `useEffect cleanup` returns the cleanup section instead of the whole hooks page. It searches the global library by default, or any folder you pass as `directory`.
 - **Markdown and plain-text URLs pass straight through.** If a URL already serves `text/markdown` or `text/plain` (like `llms.txt`), you get the file as is.
 
 ## How it works
@@ -107,6 +109,7 @@ You don't need special prompts. Just ask for what you want:
 - "Pull the uv docs into this project's `DOCS/reference` folder."
 - "Read the asyncio queue docs and tell me how `join()` works."
 - "Do we already have the FastAPI docs saved somewhere?"
+- "Search the library for how FastAPI handles background tasks."
 
 The server tells the agent to save project docs inside the project and general research in the global library, so it usually picks the right spot on its own.
 
@@ -117,7 +120,7 @@ Everything is optional.
 | Variable | Default | What it does |
 |---|---|---|
 | `PULPIE_URL` | `http://127.0.0.1:8787` | Where the backend runs. Only local URLs get auto-started. |
-| `PULPIE_HOME` | `~/.pulpie` | Holds the global library and `backend.log`. |
+| `PULPIE_HOME` | `~/.pulpie` | Holds the global library, the search index (`search.db`), and `backend.log`. |
 | `PULPIE_LIBRARY` | `$PULPIE_HOME/library` | Where saved docs go when no directory is given. |
 | `PULPIE_ALLOW_PRIVATE` | off | Set to `1` to allow `localhost` and LAN addresses. |
 | `PULPIE_IDLE_TIMEOUT` | `1800` | Seconds without requests before the backend exits. `0` keeps it running. |
@@ -144,6 +147,7 @@ If something goes wrong with the backend, check `~/.pulpie/backend.log`.
 
 - **Pages that render entirely in JavaScript** come back mostly empty, because the backend fetches the HTML the server sends and doesn't run a browser. Most docs sites (Docusaurus, MkDocs, VitePress, Sphinx, Next.js) render on the server, so this hasn't been an issue for docs so far.
 - **Code blocks are indented, not fenced.** Pulpie converts HTML to Markdown with `html2text`, which writes code as 4-space indented blocks without a language tag. It's valid Markdown, just not as pretty.
+- **Search is keyword search, not semantic search.** It uses SQLite full-text search with stemming, so `caching` finds `cache` and `readOnlyHint` finds `read_only_hint`. A question phrased in totally different words than the docs use can still miss. If nothing matches every word, the results say they only match some of the words.
 - **No PDFs.** Non-HTML pages other than Markdown and plain text are rejected.
 - **Saved pages are untrusted web content.** Anything an agent reads from them is data, not instructions.
 

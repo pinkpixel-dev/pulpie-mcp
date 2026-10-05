@@ -1,6 +1,6 @@
 [project]
 name = "pulpie-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server that turns any web page into clean Markdown with a local Pulpie model, and saves docs for agents to reference."
 readme = "README.md"
 license = "Apache-2.0"

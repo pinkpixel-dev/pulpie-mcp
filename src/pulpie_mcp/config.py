@@ -48,6 +48,10 @@ def library_dir() -> Path:
     return Path(custom).expanduser() if custom else home_dir() / "library"
 
 
+def search_db_path() -> Path:
+    return home_dir() / "search.db"
+
+
 def log_path() -> Path:
     return home_dir() / "backend.log"
 
